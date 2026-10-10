@@ -325,7 +325,7 @@
       "via_device": null
     },
     "sensors": {
-      "description": "Ladezustand der Batterie",
+      "description": "Battery state of charge",
       "friendly_name": "bpSoc",
       "icon": "mdi:battery",
       "internal_unique_id": "SN_INVERTERBOX01_JTS1_EMS_HEARTBEAT_bpSoc",
@@ -1318,7 +1318,7 @@
       "via_device": null
     },
     "sensors": {
-      "description": "Batterieleistung",
+      "description": "Battery power",
       "friendly_name": "bpPwr",
       "icon": null,
       "internal_unique_id": "SN_INVERTERBOX01_bpPwr",
@@ -1339,7 +1339,7 @@
       "via_device": null
     },
     "sensors": {
-      "description": "Solarertrag",
+      "description": "Solar yield",
       "friendly_name": "mpptPwr",
       "icon": "mdi:solar-power",
       "internal_unique_id": "SN_INVERTERBOX01_mpptPwr",
@@ -1377,7 +1377,7 @@
       "via_device": null
     },
     "sensors": {
-      "description": "Stromnetz",
+      "description": "Grid",
       "friendly_name": "sysGridPwr",
       "icon": "mdi:transmission-tower-import",
       "internal_unique_id": "SN_INVERTERBOX01_sysGridPwr",
@@ -1398,7 +1398,7 @@
       "via_device": null
     },
     "sensors": {
-      "description": "Hausnetz",
+      "description": "House load",
       "friendly_name": "sysLoadPwr",
       "icon": "mdi:home-lightning-bolt",
       "internal_unique_id": "SN_INVERTERBOX01_sysLoadPwr",

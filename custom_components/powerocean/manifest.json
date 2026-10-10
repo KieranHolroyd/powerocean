@@ -2,11 +2,12 @@
   "domain": "powerocean",
   "name": "Ecoflow PowerOcean",
   "codeowners": [
-    "@niltrip"
+    "@KieranHolroyd"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/niltrip/powerocean",
+  "documentation": "https://github.com/KieranHolroyd/powerocean",
+  "integration_type": "hub",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/niltrip/powerocean/issues",
-  "version": "2026.03.04"
+  "issue_tracker": "https://github.com/KieranHolroyd/powerocean/issues",
+  "version": "2026.10.10"
 }

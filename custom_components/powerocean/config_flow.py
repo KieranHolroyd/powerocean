@@ -133,7 +133,7 @@ class PowerOceanConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 2
 
     def __init__(self) -> None:
-        """Instanzvariablen für den Flow-Verlauf."""
+        """Initialize instance variables used across flow steps."""
         self._cloud_data: dict[str, Any] = {}
 
     async def async_step_user(
@@ -144,18 +144,18 @@ class PowerOceanConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                # 1. Validierung
+                # 1. Validate
                 await validate_input_for_device(self.hass, user_input)
 
-                # 2. Unique ID prüfen
+                # 2. Check unique ID
                 unique_id = f"PowerOcean {user_input[CONF_DEVICE_ID]}"
                 await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_configured()
 
-                # 3. Daten für Schritt 2 zwischenspeichern
+                # 3. Keep data for step 2
                 self._cloud_data = user_input
 
-                # 4. Weiter zu Schritt 2 (kein return async_create_entry!)
+                # 4. Continue to step 2 (do not return async_create_entry here!)
                 return await self.async_step_device_options()
             except HomeAssistantError:
                 errors["base"] = "cannot_connect"
@@ -167,7 +167,7 @@ class PowerOceanConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_device_options(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Schritt 2: Zusätzliche Optionen abfragen."""
+        """Step 2: ask for additional options."""
         errors = {}
         if user_input is not None:
             model_name = MODEL_NAME_MAP[
@@ -196,9 +196,9 @@ class PowerOceanConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """
-        Standard-Reconfigure.
+        Handle the standard reconfigure step.
 
-        Bestehende Instanz korrigieren (z.B. Passwort, Device ID, Model).
+        Correct an existing entry (e.g. password, device ID, model).
         """
         entry = self._get_reconfigure_entry()
 
@@ -214,7 +214,7 @@ class PowerOceanConfigFlow(ConfigFlow, domain=DOMAIN):
                 if entry.unique_id != new_unique_id:
                     await self.async_set_unique_id(new_unique_id)
 
-                # Entry aktualisieren
+                # Update entry
                 self.hass.config_entries.async_update_entry(
                     entry,
                     data=merged,
@@ -233,7 +233,7 @@ class PowerOceanConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     def _get_reconfigure_schema(self, entry: ConfigEntry) -> vol.Schema:
-        """Hilfsfunktion, um Schema für Reconfigure zu erstellen."""
+        """Build the schema for the reconfigure step."""
         return vol.Schema(
             {
                 vol.Required(
@@ -292,12 +292,12 @@ class PowerOceanOptionsFlow(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Erster Schritt des Options Flows."""
+        """Handle the first step of the options flow."""
         if user_input is not None:
-            # Erzeugt/aktualisiert das 'options' Dictionary im ConfigEntry
+            # Creates/updates the 'options' dictionary on the ConfigEntry
             return self.async_create_entry(title="", data=user_input)
 
-        # Zugriff auf self.config_entry ist hier direkt möglich
+        # self.config_entry is directly accessible here
         options = self.config_entry.options
 
         return self.async_show_form(

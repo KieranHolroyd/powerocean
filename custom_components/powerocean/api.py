@@ -158,7 +158,7 @@ class EcoflowApi:
                             return
             except (TimeoutError, aiohttp.ClientError) as err:
                 LOGGER.debug("Region (%s) failed during detection: %s", host, err)
-                continue  # Nur bekannte Netzwerk-/Timeout-Fehler abfangen
+                continue  # Only catch known network/timeout errors
 
         msg = "Could not detect region"
         raise RegionDetectionError(msg)
