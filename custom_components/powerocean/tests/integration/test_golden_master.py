@@ -39,13 +39,13 @@ def test_golden_master_parse_values(fixture_file_name, variant) -> None:
         sn="SN_INVERTERBOX01",
     )
 
-    # 🔑 DAS ist jetzt die getestete API
+    # This is the API under test
     values = parser.parse_values(api_response)
 
-    # deterministische Reihenfolge
+    # deterministic order
     values = dict(sorted(values.items()))
 
-    # Golden Master erzeugen (erster Lauf)
+    # Create golden master (first run)
     if not master_file.exists():
         master_file.write_text(
             json.dumps(values, indent=2, sort_keys=True),

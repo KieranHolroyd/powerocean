@@ -99,14 +99,14 @@ class DiffResult:
     updated_keys: list[str]
 
 
-# Logging-Setup
+# Logging setup
 logging.basicConfig(
-    level=logging.INFO,  # Standard-Level
+    level=logging.INFO,  # default level
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-# PowerOcean-Package zum Pfad hinzufügen
+# Add the PowerOcean package to the import path
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent / "custom_components"
 

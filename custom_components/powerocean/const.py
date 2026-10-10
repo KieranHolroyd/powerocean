@@ -10,7 +10,7 @@ LOGGER: Logger = getLogger(__package__)
 DOMAIN = "powerocean"
 DEFAULT_SCAN_INTERVAL = 10
 DEFAULT_NAME = "PowerOcean"
-ISSUE_URL = "https://github.com/niltrip/powerocean/issues"
+ISSUE_URL = "https://github.com/KieranHolroyd/powerocean/issues"
 ISSUE_URL_ERROR_MESSAGE = " Please log any issues here: " + ISSUE_URL
 USE_MOCKED_RESPONSE = False  # Set to True to use mocked responses for testing
 # Mock path to response.json file

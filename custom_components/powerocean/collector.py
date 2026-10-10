@@ -69,7 +69,7 @@ class StructureCollector:
             serial=device_sn,
             name=name,
             friendly_name=friendly_name,
-            value=None,  # Struktur → kein Wert
+            value=None,  # structure only → no value
             cls=SensorMetaHelper.get_class(key),
             description=SensorMetaHelper.get_description(key),
             icon=SensorMetaHelper.get_special_icon(key),

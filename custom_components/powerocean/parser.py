@@ -207,11 +207,11 @@ class EcoflowParser:
         """Search recursive for the occurrence of target_key in nested dict/list."""
         if isinstance(data, dict):
             for key, value in data.items():
-                # Treffer
+                # Match
                 if key == target_key:
                     return value
 
-                # Rekursiv tiefer suchen
+                # Search deeper recursively
                 result = self._deep_get_by_key(value, target_key)
                 if result is not None:
                     return result
@@ -236,12 +236,12 @@ class EcoflowParser:
         for box_type, schema in BOX_SCHEMAS.items():
             detect_fn = schema.get("detect")
             if not callable(detect_fn):
-                continue  # Kein detect-Feld, überspringen
+                continue  # No detect field, skip
             try:
                 if detect_fn(payload):
                     return box_type, schema
             except (KeyError, TypeError, AttributeError) as e:
-                # Loggen statt blind zu ignorieren
+                # Log instead of silently ignoring
                 LOGGER.warning("Error detecting box schema for %s: %s", box_type, e)
                 continue
         return None
@@ -253,7 +253,7 @@ class EcoflowParser:
 
         sn_value = self._get_nested_value(payload, path) if path else fallback_sn
 
-        # nur strings weitergeben
+        # only pass strings through
         sn = sn_value if isinstance(sn_value, str) else None
         if not sn:
             return None
@@ -298,11 +298,11 @@ class EcoflowParser:
         if not isinstance(key, str):
             return False
 
-        # Spezialfall ENERGY_STREAM_REPORT
+        # Special case: ENERGY_STREAM_REPORT
         if report == ReportMode.ENERGY_STREAM.value:
             return key.split("_", 1)[1] == report
 
-        # Default-Fall
+        # Default case
         return key.endswith(report)
 
     def _decode_sn(self, value: str | None) -> str | None:
@@ -321,7 +321,7 @@ class EcoflowParser:
         payload: dict,
     ) -> tuple[str, DeviceInfo]:
         """Resolve serial number and DeviceInfo for non-boxed reports."""
-        # bekannte SN-Felder (Reihenfolge = Priorität)
+        # known SN fields (order = priority)
         sn_keys = ("evSn", "hrSn")
 
         device_sn = self.sn_inverter
@@ -412,7 +412,7 @@ class EcoflowParser:
             - Standard report processing
 
         """
-        # Report-Key ggf. anpassen
+        # Adjust report key if needed
         report_to_log = report
 
         key, d = next(
@@ -426,18 +426,18 @@ class EcoflowParser:
         d = response.get(key) if key else None
 
         if not isinstance(d, dict):
-            d = {}  # sicherstellen, dass wir ein dict haben
+            d = {}  # make sure we have a dict
 
-        # --- EMS_CHANGE_REPORT + EMS_STATE_CHANGE_REPORT zusammenführen ---
+        # --- Merge EMS_CHANGE_REPORT + EMS_STATE_CHANGE_REPORT ---
         if report == ReportMode.EMS_CHANGE.value:
-            # Keys für den "neuen" Report finden
+            # Find keys for the "new" report
             ems_state_keys = [
                 k for k in response if k.endswith(ReportMode.EMS_STATE_CHANGE.value)
             ]
             for ems_key in ems_state_keys:
                 extra_data = response.get(ems_key)
                 if isinstance(extra_data, dict):
-                    # Keys behalten, die im REPORT_DATAPOINTS[EMS_CHANGE] definiert sind
+                    # Keep keys defined in REPORT_DATAPOINTS[EMS_CHANGE]
                     for k in REPORT_DATAPOINTS[ReportMode.EMS_CHANGE.value]:
                         if k in extra_data:
                             d[k] = extra_data[k]
@@ -447,9 +447,9 @@ class EcoflowParser:
             return
 
         sens_select = list(REPORT_DATAPOINTS.get(report, ()))
-        # Setze Report-Namen korrekt aus response
+        # Take the actual report name from the response
         report = key or report
-        # Battery und Wallbox Handling
+        # Battery and wallbox handling
         if ReportMode.BATTERY.value in report or ReportMode.WALLBOX.value in report:
             self._handle_boxed_devices(
                 d,
@@ -493,7 +493,7 @@ class EcoflowParser:
                 report,
                 collector,
             )
-        # Standardverarbeitung
+        # Default processing
         self._handle_standard_mode(d, report, sens_select, collector=collector)
 
     def _handle_boxed_devices(
@@ -517,7 +517,7 @@ class EcoflowParser:
                 LOGGER.debug("Unknown boxed device schema")
                 continue
 
-            # box_type wird aktuell nicht genutzt
+            # box_type is currently unused
             _, schema = detected
 
             device_sn = self._extract_box_sn(payload, schema, box_sn_raw)
@@ -556,7 +556,7 @@ class EcoflowParser:
             via_sn=None,
         )
 
-        # EMS Heartbeat: ggf. verschachtelte Strukturen, spezielle Behandlung
+        # EMS heartbeat: may contain nested structures, needs special handling
         for key, value in d.items():
             if key in sens_select:
                 self._collect_sensor(
@@ -567,7 +567,7 @@ class EcoflowParser:
                     value,
                     device_info=device_info,
                 )
-        # Besonderheiten Phasen
+        # Per-phase values
         phases = ["pcsAPhase", "pcsBPhase", "pcsCPhase"]
         if all(phase in d for phase in phases):
             for phase in phases:
@@ -582,12 +582,12 @@ class EcoflowParser:
                         device_info=device_info,
                     )
 
-        # Besonderheit mpptPv
+        # mpptPv special case
         if "mpptHeartBeat" in d:
             mppt_data = d["mpptHeartBeat"][0]
             report_mppt = f"{report}_mpptHeartBeat"
 
-            # Einzelne MPPT-Module
+            # Individual MPPT strings
             for i, mppt in enumerate(mppt_data["mpptPv"], start=1):
                 for key, value in mppt.items():
                     key_ext = f"mpptPv{i}_{key}"
@@ -600,7 +600,7 @@ class EcoflowParser:
                         device_info=device_info,
                     )
 
-            # Gesamtleistung MPPT
+            # Total MPPT power
             total_power = sum(mppt.get("pwr", 0) for mppt in mppt_data["mpptPv"])
             self._collect_sensor(
                 collector,
@@ -611,7 +611,7 @@ class EcoflowParser:
                 device_info=device_info,
             )
 
-            # Isolationswiderstand
+            # Insulation resistance
             mppt_ins_resist = mppt_data.get("mpptInsResist")
             if mppt_ins_resist is not None:
                 self._collect_sensor(
@@ -629,14 +629,14 @@ class EcoflowParser:
 
             solar = max(float(total_power), 0.0)
 
-            # grid +- Werte in "pcsMeterPower", positiv = Import, negativ = Export
+            # grid: signed "pcsMeterPower", positive = import, negative = export
             grid = float(d.get("pcsMeterPower", 0))
 
-            # battery +- Werte in "emsBpPower", positiv = Ladung, negativ = Entladung
+            # battery: signed "emsBpPower", positive = charge, negative = discharge
             battery = float(d.get("emsBpPower", 0))
 
             # ------------------------------
-            # Vorzeichen normalisieren
+            # Split signed values
             # ------------------------------
             grid_import = max(grid, 0.0)
             grid_export = max(-grid, 0.0)
@@ -645,13 +645,13 @@ class EcoflowParser:
             battery_discharge = max(-battery, 0.0)
 
             # ------------------------------
-            # Hausverbrauch (physikalische Bilanz)
+            # House consumption (energy balance)
             # ------------------------------
             house_consumption = solar + grid + battery_discharge - battery_charge
             house_consumption = max(house_consumption, 0.0)
 
             # ------------------------------
-            # SOLAR-Verteilung
+            # SOLAR distribution
             # ------------------------------
             solar_to_house = min(solar, house_consumption)
 
@@ -662,24 +662,24 @@ class EcoflowParser:
             solar_to_grid = solar_surplus - solar_to_battery
 
             # ------------------------------
-            # BATTERIE-Flüsse
+            # BATTERY flows
             # ------------------------------
             battery_to_house = max(battery_discharge, 0.0)
 
             grid_to_battery = battery_charge - solar_to_battery
 
             # ------------------------------
-            # NETZ-Flüsse
+            # GRID flows
             # ------------------------------
             grid_to_house = grid_import - grid_to_battery
 
-            # Numerische Sicherheit
+            # Clamp rounding noise
             grid_to_house = max(grid_to_house, 0.0)
             grid_to_battery = max(grid_to_battery, 0.0)
             solar_to_grid = max(solar_to_grid, 0.0)
 
             # ------------------------------
-            # Sensorliste
+            # Sensor list
             # ------------------------------
             sensors = [
                 ("housePower", house_consumption),
@@ -760,7 +760,7 @@ class EcoflowParser:
             raw_sn = device_data.get("devSn")
             device_sn = self._decode_sn(raw_sn) if raw_sn else None
 
-            # Wenn keine SN vorhanden → aggregierter Wert
+            # No SN present → aggregated value
             if not device_sn:
                 device_sn = f"{self.sn}_all"
 
@@ -793,7 +793,7 @@ class EcoflowParser:
         sens_select: list,
         collector: ReportCollector,
     ) -> None:
-        # spezielle Behandlung für 'data' Report
+        # special handling for the 'data' report
         report_id = "" if report == ReportMode.DEFAULT.value else f"{report}"
         device_sn, device_info = self._resolve_device_info(d)
 
@@ -821,7 +821,7 @@ class EcoflowParser:
         collector: ReportCollector,
     ) -> None:
         """Handle for RE307_EDEV_SYS_REPORT."""
-        # SN über Deep Search holen
+        # Find SN via deep search
         device_sn = self._deep_get_by_key(d, "devSn")
 
         if not device_sn:
@@ -834,7 +834,7 @@ class EcoflowParser:
             via_sn=self.sn_inverter,
         )
 
-        # sens_select generisch auflösen
+        # resolve sens_select generically
         for key in sens_select:
             value = device_sn if key == "devSn" else self._deep_get_by_key(d, key)
 
@@ -843,7 +843,7 @@ class EcoflowParser:
             if value is None:
                 continue
 
-            # nur primitive Werte erlauben
+            # only allow primitive values
             if isinstance(value, (dict, list)):
                 continue
 

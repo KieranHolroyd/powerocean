@@ -175,7 +175,7 @@ class SensorMetaHelper:
 
     @staticmethod
     def get_class(key: str) -> SensorClassTuple | None:
-        """See UnitHelper.infer_unit()."""
+        """See SensorClassHelper.infer_class()."""
         return SensorClassHelper.infer_class(key)
 
     @staticmethod
@@ -183,26 +183,26 @@ class SensorMetaHelper:
         """Get description from key name using a dictionary mapping."""
         # Dictionary for key-to-description mapping
         description_mapping = {
-            "sysLoadPwr": "Hausnetz",
-            "housePower": "Hausnetz (berechnet)",
-            "sysGridPwr": "Stromnetz",
-            "gridPower": "Netzleistung",
-            "gridToBattery": "Netz zu Batterie",
-            "gridToHouse": "Netz zu Haus",
-            "batteryToHouse": "Batterie zu Haus",
-            "solarToBattery": "Solar zu Batterie",
-            "solarToGrid": "Solar zu Netz",
-            "solarToHouse": "Solar zu Haus",
-            "mpptPwr": "Solarertrag",
-            "bpPwr": "Batterieleistung",
-            "bpSoc": "Ladezustand der Batterie",
+            "sysLoadPwr": "House load",
+            "housePower": "House load (calculated)",
+            "sysGridPwr": "Grid",
+            "gridPower": "Grid power",
+            "gridToBattery": "Grid to battery",
+            "gridToHouse": "Grid to house",
+            "batteryToHouse": "Battery to house",
+            "solarToBattery": "Solar to battery",
+            "solarToGrid": "Solar to grid",
+            "solarToHouse": "Solar to house",
+            "mpptPwr": "Solar yield",
+            "bpPwr": "Battery power",
+            "bpSoc": "Battery state of charge",
             "online": "Online",
             "systemName": "System Name",
-            "createTime": "Installations Datum",
-            "bpVol": "Batteriespannung",
-            "bpAmp": "Batteriestrom",
-            "bpCycles": "Ladezyklen",
-            "bpTemp": "Temperatur der Batteriezellen",
+            "createTime": "Installation date",
+            "bpVol": "Battery voltage",
+            "bpAmp": "Battery current",
+            "bpCycles": "Charge cycles",
+            "bpTemp": "Battery cell temperature",
         }
 
         # Use .get() to avoid KeyErrors and return default value
@@ -210,16 +210,16 @@ class SensorMetaHelper:
 
     @staticmethod
     def get_special_icon(key: str) -> str | None:
-        """Infer a Home Assistant icon from key semantics (generisch)."""
+        """Infer a Home Assistant icon from key semantics."""
         k = key.lower()
         keyword_icons = [
-            # Status / Diagnose
+            # Status / diagnostics
             (r"online$", "mdi:cloud-check"),
             (r"(code)", "mdi:alert-circle-outline"),
             (r"(ems|bms|bp).*state", "mdi:information-outline"),
             (r"(bmsrunsta|bmschgdsgsta)", "mdi:chip"),
             (r"(selfcheck|run)", "mdi:information-outline"),
-            # Allgemeine Endungen
+            # Common suffixes
             (r"sn$", "mdi:barcode"),
             (r"name$", "mdi:label-outline"),
             (r"bright$", "mdi:brightness-percent"),
@@ -234,7 +234,7 @@ class SensorMetaHelper:
             (r"(pv|mppt).*amp", "mdi:current-dc"),
             (r"(pv|mppt).*resist", "mdi:resistor"),
             (r"_pwr$", "mdi:flash"),
-            # Netz / Haus / Batterie
+            # Grid / house / battery
             (r"solartobattery|solartogrid|solartohouse", "mdi:solar-power"),
             (
                 r"(housepower|sysloadpwr|pcsactpwr|pcsmeterpower)",
@@ -243,9 +243,9 @@ class SensorMetaHelper:
             (r"(gridtohouse|sysgridpwr|gridpower)", "mdi:transmission-tower-import"),
             (r"batterytohouse", "mdi:battery-arrow-up"),
             (r"gridtobattery", "mdi:battery-arrow-down"),
-            # Strom / Spannung
+            # Current / voltage
             (r"_amp$", "mdi:current-ac"),
-            # Batterie / Speicher
+            # Battery / storage
             (r"(soc)", "mdi:battery"),
             (r"(soh)", "mdi:battery-heart-variant"),
             (r"(remainwatth)", "mdi:home-battery"),

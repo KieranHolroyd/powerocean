@@ -67,10 +67,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     """
     try:
-        # Integration laden
+        # Load integration
         integration = await async_get_integration(hass, DOMAIN)
 
-        # Zugriff auf manifest.json-Inhalte
+        # Read manifest.json contents
         manifest = integration.manifest
         name = manifest.get("name", DOMAIN)
         version = manifest.get("version", "unknown")
@@ -89,9 +89,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     except HomeAssistantError as err:
         LOGGER.error("Home Assistant error during PowerOcean setup: %s", err)
         return False
-    except Exception:  # optional fallback, nur loggen
+    except Exception:  # optional fallback, log only
         LOGGER.exception("Unexpected error loading PowerOcean integration")
-        raise  # Fehler weiterwerfen, damit HA korrekt reagiert
+        raise  # re-raise so Home Assistant handles it
 
     return True
 
@@ -101,7 +101,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options = dict(entry.options)
     updated = False
 
-    # Migration fehlender Optionen
+    # Migrate missing options
     if CONF_SCAN_INTERVAL not in options:
         options[CONF_SCAN_INTERVAL] = entry.data.get("options", {}).get(
             "scan_interval", DEFAULT_SCAN_INTERVAL
@@ -118,7 +118,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_update_entry(entry, options=options)
         LOGGER.debug("Migrated missing options for %s: %s", entry.title, options)
 
-    # --- EcoFlow API initialisieren ---
+    # --- Initialize EcoFlow API ---
     device_id = entry.data.get(CONF_DEVICE_ID)
     model_id = entry.data.get(CONF_MODEL_ID)
     if not device_id or not model_id:
@@ -133,18 +133,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         model_id,
     )
 
-    # --- Authentifizieren ---
+    # --- Authenticate ---
     try:
         await api.async_authorize()
     except ConfigEntryNotReady:
-        # Netzwerkproblem → Setup wird retryt
+        # Network problem → setup will be retried
         raise
     except IntegrationError as e:
-        # Auth-Fehler oder unerwartete API-Probleme → Setup schlägt fehl
+        # Auth error or unexpected API problem → setup fails
         LOGGER.error("Failed to authenticate EcoFlow device %s: %s", entry.title, e)
         return False
 
-    # --- Struktur & Parser ---
+    # --- Structure & parser ---
     raw = await api.fetch_raw()
     parser = EcoflowParser(variant=api.variant, sn=api.sn)
     endpoints = parser.parse_structure(raw)
@@ -164,7 +164,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "endpoints": endpoints,
     }
 
-    # --- Sensor-Plattformen laden ---
+    # --- Load sensor platforms ---
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     model_name = MODEL_NAME_MAP[PowerOceanModel(model_id)]
@@ -180,7 +180,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         configuration_url="https://user-portal.ecoflow.com/",
     )
 
-    # Listener für Optionsänderungen
+    # Listener for options changes
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
     return True
@@ -193,7 +193,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options = dict(entry.options)
 
     if version < 2:
-        # ALT → NEU
+        # OLD → NEW
         if "user_input" in data:
             old = data.pop("user_input")
 
@@ -206,7 +206,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 }
             )
 
-            # Optionen auslagern
+            # Move options out of data
             options.setdefault(
                 CONF_FRIENDLY_NAME,
                 old.get(CONF_FRIENDLY_NAME, DEFAULT_NAME),
@@ -236,6 +236,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload the config entry when options are updated (z.B. polling interval)."""
+    """Reload the config entry when options are updated (e.g. polling interval)."""
     LOGGER.debug("Reloading PowerOcean entry %s due to options change", entry.entry_id)
     await hass.config_entries.async_reload(entry.entry_id)

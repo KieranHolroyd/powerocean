@@ -76,27 +76,27 @@ template:
         unique_id: "house_battery_charge_runtime"
         unit_of_measurement: "hours"
         state: >
-          {# Max Kapazität in kWh, später durch Sensor ersetzen #}
+          {# Max capacity in kWh, replace with a sensor later #}
           {% set battery_capacity = 10.0 %}
-          {# Backup in %, später durch Sensor ersetzen #}
+          {# Backup reserve in %, replace with a sensor later #}
           {% set backup_percent = 5.0 %}
           {% set soc = states('sensor.powerocean_bpsoc') | float(0) %}
-          {# Ladeleistung (Watt), ersetze durch Sensor für Ladeleistung #}
+          {# Charging power (W), replace with your charging power sensor #}
           {% set charging_power = states('sensor.powerocean_SN_solartobattery') | float(0) %}
 
-          {# Nur wenn Batterie lädt (positiver Wert für Ladeleistung) #}
+          {# Only while the battery is charging (positive charging power) #}
           {% if charging_power > 0 %}
 
-            {# Prozent unterhalb Backup #}
+            {# Percentage still to charge #}
             {% set max_soc = 100.0 %}
             {% set chargeable_percent = max_soc - backup_percent - soc %}
 
-            {# Wenn ein Ladezustand verfügbar ist (Prozent unter Backup) #}
+            {# Only if there is still room to charge #}
             {% if chargeable_percent > 0 %}
               {% set chargeable_capacity = battery_capacity * (chargeable_percent / 100) %}
 
-              {# Ladezeit in Stunden (Kapazität / Ladeleistung) #}
-              {# *1000 wegen kWh zu Watt #}
+              {# Charge time in hours (capacity / charging power) #}
+              {# *1000 converts kWh to Wh #}
               {{ (chargeable_capacity * 1000 / charging_power) | round(2) }}
             {% else %}
               0
@@ -111,16 +111,16 @@ template:
         state: >
           {# replace SN with your inverter SN #}
           {% set battery_load = states('sensor.powerocean_SN_batterytohouse') | float(0) %}
-          {# Max Kapazität in kWh, später durch Sensor ersetzen #}
+          {# Max capacity in kWh, replace with a sensor later #}
           {% set battery_capacity = 10.0 %}
-          {# Backup in %, später durch Sensor ersetzen #}
+          {# Backup reserve in %, replace with a sensor later #}
           {% set backup_percent = 5.0 %}
           {% set soc = states('sensor.powerocean_bpsoc') | float(0) %}
 
-          {# Nur wenn Batterie ins Haus entlädt (positiver Wert) #}
+          {# Only while the battery discharges into the house (positive value) #}
           {% if battery_load > 0 %}
 
-            {# Prozent oberhalb Backup #}
+            {# Percentage above the backup reserve #}
             {% set usable_percent = [soc - backup_percent, 0] | max %}
             {% set available_capacity = battery_capacity * (usable_percent / 100) %}
 
@@ -150,7 +150,7 @@ template:
           {% endif %}
 
 sensor:
-  # Integrale für PowerOcean
+  # Riemann-sum integrals for PowerOcean
   - platform: integration
     source: sensor.powerocean_solar_all
     name: "PowerOcean Solar All kWh"
