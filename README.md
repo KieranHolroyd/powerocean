@@ -1,66 +1,80 @@
 <!-- prettier-ignore -->
 # Ecoflow PowerOcean
-[![GitHub release](https://img.shields.io/github/release/niltrip/powerocean?include_prereleases=&sort=semver&color=blue)](https://github.com/niltrip/powerocean/releases/)
-[![issues - powerocean](https://img.shields.io/github/issues/niltrip/powerocean)](https://github.com/niltrip/powerocean/issues)
-[![GH-code-size](https://img.shields.io/github/languages/code-size/niltrip/powerocean?color=red)](https://github.com/niltrip/powerocean)
-[![GH-last-commit](https://img.shields.io/github/last-commit/niltrip/powerocean?style=flat-square)](https://github.com/niltrip/powerocean/commits/main)
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-[![HACS validation](https://github.com/niltrip/powerocean/workflows/Validate/badge.svg)](https://github.com/niltrip/powerocean/actions?query=workflow:"Validate")
-![installation_badge](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=integration%20usage&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.powerocean.total)
+[![GitHub release](https://img.shields.io/github/release/KieranHolroyd/powerocean?include_prereleases=&sort=semver&color=blue)](https://github.com/KieranHolroyd/powerocean/releases/)
+[![issues - powerocean](https://img.shields.io/github/issues/KieranHolroyd/powerocean)](https://github.com/KieranHolroyd/powerocean/issues)
+[![GH-last-commit](https://img.shields.io/github/last-commit/KieranHolroyd/powerocean?style=flat-square)](https://github.com/KieranHolroyd/powerocean/commits/main)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![Validate](https://github.com/KieranHolroyd/powerocean/actions/workflows/validate.yml/badge.svg)](https://github.com/KieranHolroyd/powerocean/actions/workflows/validate.yml)
 
+[Home Assistant](https://home-assistant.io/) custom integration that reads live data from an EcoFlow PowerOcean system (inverter, batteries, PowerPulse wallbox, PowerGlow heating rod) through the EcoFlow cloud.
 
-[Home Assistant](https://home-assistant.io/) custom component to get access to my EcoFlow PowerOcean system.
-
-This component was inspired by [tolwi/hassio-ecoflow-cloud](https://github.com/tolwi/hassio-ecoflow-cloud) and is a copy of [evercape/hass-resol-KM2](https://github.com/evercape/hass-resol-KM2).
-
-## Disclaimers
-
-⚠️ Temporary quick solution to my problem ("Nothing is more persistent than a makeshift solution.").
-I hope of an integrate PowerOcean into [tolwi/hassio-ecoflow-cloud](https://github.com/tolwi/hassio-ecoflow-cloud) with an official API.
-
-Nevertheless, I hope that it works for others as well.
+This is a fork of [niltrip/powerocean](https://github.com/niltrip/powerocean), translated to English and packaged as its own HACS custom repository. All the original work is niltrip's; see [Credits](#credits).
 
 ## Prerequisites
 
-I have tested the component with my System.
-I use the Android App and the Webportal at https://portal.ecoflow.com/user/eu/de/login
-
-You need the S/N number of your inverter and your credentinals
+- An EcoFlow account with the PowerOcean system added (the same login you use in the EcoFlow app or at https://portal.ecoflow.com).
+- The serial number of your PowerOcean inverter (shown in the EcoFlow app).
+- Home Assistant 2025.2.4 or newer.
 
 ## Installation
 
-- Install as a custom repository via HACS
-- Manually download and extract to the custom_components directory
+### HACS (recommended)
 
-Once installed, use Add Integration -> Ecoflow PowerOcean.
+[![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=KieranHolroyd&repository=powerocean&category=integration)
+
+Or add it by hand:
+
+1. In Home Assistant open **HACS**, then the **⋮** menu in the top right, then **Custom repositories**.
+2. Repository: `https://github.com/KieranHolroyd/powerocean`, type: **Integration**, then **Add**.
+3. Search HACS for **Ecoflow PowerOcean**, open it and select **Download**.
+4. Restart Home Assistant.
+
+> [!IMPORTANT]
+> This fork uses the same `powerocean` domain as niltrip's version in the HACS default store, so only one of them can be installed at a time.
+> If you already have niltrip's version, remove it in HACS first (**HACS → Ecoflow PowerOcean → ⋮ → Remove**), then install this one and restart.
+> Your existing PowerOcean config entry, entities and history stay in place because the domain and unique IDs are unchanged.
+
+### Manual
+
+1. Download `powerocean.zip` from the [latest release](https://github.com/KieranHolroyd/powerocean/releases/latest).
+2. Extract it into `<config>/custom_components/powerocean/`.
+3. Restart Home Assistant.
 
 ## Configuration
 
-Follow the flow.
+Go to **Settings → Devices & services → Add integration → Ecoflow PowerOcean** and follow the flow.
 
 ![step 1](documentation/setup_step_01.png)
 ![step 2](documentation/setup_step_02.png)
 ![step 3](documentation/setup_step_03.png)
 
+## Sensors
 
+Sensors are registered to the device as `sensor.{device_name}_{sensor_name}`, with `sensor_name` as the friendly name.
+Each sensor also carries these attributes:
 
-### Sensors
-Sensors are registered to device as `sensor.{device_name}_{sensor_name}` with an friendly name of `sensor_name`.
-Additional attributes are presented on each sensor:
-- Product Description, Destination Name, Source Name: internal names
-- Internal Unique ID: `{serial}_{sensor_name}` or `{serial}_{report}_{sensor_name}`
-- Device Name: `{serial}`
-- Vendor Product Serial: serial number of the PowerOcean inverter
-- Vendor Firmware Version: 5.1.27
-- Vendor Product Build: 28
+- Product description: the internal EcoFlow field name, or an English label for common fields
+- Internal unique ID: `{serial}_{sensor_name}` or `{serial}_{report}_{sensor_name}`
+- Device name: `{serial}`
+- Product serial: serial number of the device the value belongs to
 
-The versions are from my system.
+Batteries, the PowerPulse wallbox and the PowerGlow heating rod show up as their own devices, keyed by serial number:
+
+![integration](documentation/integration.PNG)
+![powerpulse](documentation/powerpulse.png)
+![powerglow](documentation/powerglow.png)
+
+### Calculated solar total
+
+`mpptPv_pwrTotal` is calculated by the integration from the individual MPPT strings:
+
+![sensor](documentation/mpptPv_pwrTotal.PNG)
 
 ### Which values update, and which do not
 
-The EcoFlow cloud does not refresh all values at the same rate. Some of them keep returning the same number for hours. The integration reports what the API hands it, so a flat line here is not a bug in this component.
+The EcoFlow cloud does not refresh all values at the same rate. Some of them keep returning the same number for hours. The integration reports what the API hands it, so a flat line is not a bug in this component.
 
-Measured on my own system over 72 hours (three-phase PowerOcean, one battery, release 2026.03.04):
+Measured on one system over 72 hours (three-phase PowerOcean, one battery, release 2026.03.04):
 
 | sensor | report | distinct values in 72 h |
 |---|---|---|
@@ -72,31 +86,24 @@ Measured on my own system over 72 hours (three-phase PowerOcean, one battery, re
 
 On 2026-08-21 at 13:16 `mpptPwr` read 0 W while `mpptPv_pwrTotal` read 4238 W. Both describe the same solar power, and both came out of the same response.
 
-Others report in [#34](https://github.com/niltrip/powerocean/issues/34) and [#28](https://github.com/niltrip/powerocean/issues/28) that these values start moving again while the app or the web portal is open. I cannot confirm that part myself.
+Users report in [niltrip/powerocean#34](https://github.com/niltrip/powerocean/issues/34) and [niltrip/powerocean#28](https://github.com/niltrip/powerocean/issues/28) that the stale values start moving again while the EcoFlow app or web portal is open.
 
-For a dashboard, take the values from `EMS_HEARTBEAT`:
+For a dashboard, use the values from `EMS_HEARTBEAT`:
 
 - grid: `pcsMeterPower` (positive = import, negative = export) rather than `sysGridPwr`
 - solar: `mpptPv_pwrTotal` rather than `mpptPwr`, `pv1Pwr` or `pvInvPwr`
 - battery: `emsBpPower` rather than `bpPwr`
 - house: `housePower`, which is calculated from the three values above
 
-### Neuer Sensor (berechnet aus einzelnen Strings)
+### Energy dashboard
 
-![sensor](documentation/mpptPv_pwrTotal.PNG)
-
-### Darstellung einzelner Geräte über SN
-![integration](documentation/integration.PNG)
-![powerpulse](documentation/powerpulse.png)
-![powerglow](documentation/powerglow.png)
-
-
-### Energiedashboard
 ![dashboard](documentation/dashboard.PNG)
 
+The EcoFlow cloud does not expose lifetime grid import/export counters through the endpoint this integration uses. Until the integration provides them itself, [`config/configuration.yaml`](config/configuration.yaml) shows how to build kWh sensors from the power sensors with template sensors and Home Assistant's [Integral (Riemann sum)](https://www.home-assistant.io/integrations/integration/) helper.
 
 ## Troubleshooting
-Please set your logging for the this custom component to debug during initial setup phase. If everything works well, you are safe to remove the debug logging:
+
+Turn on debug logging for this integration during setup. Once everything works you can remove it again:
 
 ```yaml
 logger:
@@ -105,8 +112,10 @@ logger:
     custom_components.powerocean: debug
 ```
 
+Please report problems at https://github.com/KieranHolroyd/powerocean/issues and attach the debug log.
+
 ## Credits
 
-Thanks to my kollege David for giving me a start point.
-
-And also thanks for the great work of the team from homeassistant and the great community.
+- [niltrip](https://github.com/niltrip), who wrote and maintains the original [niltrip/powerocean](https://github.com/niltrip/powerocean) integration, and everyone who contributed to it.
+- The original was inspired by [tolwi/hassio-ecoflow-cloud](https://github.com/tolwi/hassio-ecoflow-cloud) and started from [evercape/hass-resol-KM2](https://github.com/evercape/hass-resol-KM2).
+- The Home Assistant team and community.

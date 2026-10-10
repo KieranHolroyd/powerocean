@@ -29,38 +29,37 @@ change-template: "- ${{TITLE}} (#${{NUMBER}} by @${{AUTHOR}})"
 template: |
   # 🔌 PowerOcean – Release ${{VERSION}}
 
-  Danke fürs Nutzen der Integration ❤️
+  Thanks for using the integration ❤️
 
   ---
 
-  ## 📢 Wichtige Hinweise
+  ## 📢 Important
 
-  ⚠️ **Nach dem Update bitte Home Assistant neu starten.**
+  ⚠️ **Restart Home Assistant after updating.**
 
-  🏠 Mindestversion Home Assistant: **2025.1.0**
-  (Anpassen falls erforderlich)
+  🏠 Minimum Home Assistant version: **2025.2.4**
 
   ---
 
-  ## 🔄 Änderungen
+  ## 🔄 Changes
 
   $CHANGES
 
   ---
 
-  ## 📥 Installation / Update
+  ## 📥 Install / update
 
   **HACS:**
-  HACS → Integrationen → PowerOcean → Update
+  HACS → Integrations → Ecoflow PowerOcean → Update
 
-  **Manuell:**
-  1. ZIP herunterladen
-  2. `custom_components/powerocean` ersetzen
-  3. Home Assistant neu starten
+  **Manual:**
+  1. Download `powerocean.zip` from this release
+  2. Replace `custom_components/powerocean` with its contents
+  3. Restart Home Assistant
 
   ---
 
-  ## 🧪 Getestet mit
+  ## 🧪 Tested with
 
-  - Home Assistant Core (aktuelle Version)
+  - Home Assistant Core (current release)
   - Python 3.13
